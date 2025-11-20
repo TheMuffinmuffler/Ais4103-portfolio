@@ -16,5 +16,5 @@ add_library(utility
 )
 
 target_pedantic_build(utility)
-target_link_libraries(utility PUBLIC Eigen3::Eigen trac_ik orocos-kdl)
+target_link_libraries(utility PUBLIC Eigen3::Eigen orocos-kdl trac_ik)
 target_include_directories(utility PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/)

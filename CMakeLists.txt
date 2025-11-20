@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.30)
 project(AIS4104-Portfolio)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "15.7" CACHE STRING "Minimum OS X deployment version")
+
 
 option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_ALL_WARNINGS "Build with all compiler warnings" OFF)
@@ -22,6 +24,7 @@ add_subdirectory(app)
 add_subdirectory(utility)
 add_subdirectory(simulation)
 add_subdirectory(visualization)
+
 
 add_dependencies(app utility)
 add_dependencies(app simulation)

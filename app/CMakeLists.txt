@@ -20,4 +20,5 @@ add_executable(app
 
 target_pedantic_build(app)
 target_link_libraries(app PRIVATE visualization utility threepp)
+target_link_libraries(app PRIVATE trac_ik utility simulation visualization)
 target_include_directories(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
