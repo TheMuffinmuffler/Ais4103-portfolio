@@ -81,19 +81,27 @@ Eigen::Vector3d RobotWrapper::current_orientation_zyx() const
 //TASK: Calculate the pose of the end effector using forward kinematics and m_solver.
 Eigen::Matrix4d RobotWrapper::current_flange_pose() const
 {
-    return Eigen::Matrix4d::Identity();
+    Eigen::VectorXd current_joints = joint_positions();
+    Eigen::Matrix4d flange_pose = m_solver->fk_solve(current_joints);
+    return flange_pose;
 }
 
 //TASK: Based on the flange pose, return its linear position.
 Eigen::Vector3d RobotWrapper::current_flange_position() const
 {
-    return Eigen::Vector3d::Zero();
+   Eigen::Matrix4d T = current_flange_pose();
+    Eigen::Vector3d p = T.block<3,1>(0,3);
+
+    return p;
 }
 
 //TASK: Based on the flange pose, return its orientation in the Euler ZYX representation.
 Eigen::Vector3d RobotWrapper::current_flange_orientation_zyx() const
 {
-    return Eigen::Vector3d::Zero();
+    Eigen::Matrix4d T = current_flange_pose();
+    Eigen::Matrix3d R = T.block<3,3>(0,0);
+    Eigen::Vector3d euler_ZYX = utility::euler_zyx_from_rotation_matrix(R);
+    return euler_ZYX;
 }
 
 const Simulation::JointLimits& RobotWrapper::joint_limits() const
