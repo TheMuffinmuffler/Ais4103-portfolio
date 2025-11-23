@@ -45,7 +45,24 @@ Eigen::VectorXd RobotWrapper::ik_solve_pose(const Eigen::Matrix4d &eef_pose, con
 // b) Use the m_solver.ik_solve() overload with the solution selector lambda to choose the most desirable IK solution.
 Eigen::VectorXd RobotWrapper::ik_solve_flange_pose(const Eigen::Matrix4d &flange_pose, const Eigen::VectorXd &j0) const
 {
-    return joint_positions();
+    Eigen::Matrix4d tool_pose = flange_pose * m_tool_transform;
+    Eigen::VectorXd solution = m_solver->ik_solve(tool_pose, j0, [&](const std::vector<Eigen::VectorXd> & candidates) -> uint_fast32_t {
+        if (candidates.empty()) return 0u;
+
+        uint32_t best_guess = 0;
+        double best_dist = (candidates[0]-j0).norm();
+
+        for (uint32_t i = 1; i < candidates.size(); ++i) {
+            double dist = (candidates[i]-j0).norm();
+            if (dist < best_dist) {
+                best_dist = dist;
+                best_guess = i;
+            }
+            return best_guess;
+        }
+    }
+    );
+    return solution;
 }
 
 Eigen::Matrix4d RobotWrapper::tool_transform() const
