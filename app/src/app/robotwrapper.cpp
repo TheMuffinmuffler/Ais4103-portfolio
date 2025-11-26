@@ -71,7 +71,7 @@ Eigen::VectorXd RobotWrapper::ik_solve_flange_pose(const Eigen::Matrix4d &flange
 
     return ik_solve_flange_pose(flange_pose,j0);
 }
-    /*
+/*
     Eigen::Matrix4d tool_pose = flange_pose * m_tool_transform;
     Eigen::VectorXd solution = m_solver->ik_solve(tool_pose, j0, [&](const std::vector<Eigen::VectorXd> & candidates) -> uint_fast32_t {
         if (candidates.empty()) return 0u;
@@ -93,6 +93,7 @@ Eigen::VectorXd RobotWrapper::ik_solve_flange_pose(const Eigen::Matrix4d &flange
     return solution;
 }
 */
+
 Eigen::Matrix4d RobotWrapper::tool_transform() const
 {
     return m_tool_transform;
