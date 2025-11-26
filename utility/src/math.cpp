@@ -77,7 +77,7 @@ Eigen::MatrixXd adjoint_matrix(const Eigen::Matrix4d &tf)
     return AdT;
 }
     // Definition 3.20 on page 98, MR pre-print 2019
-    // alot got auto completed by clion
+
 Eigen::VectorXd adjoint_map(const Eigen::VectorXd &twist, const Eigen::Matrix4d &tf)
 {
         Eigen::Matrix3d R = tf.block<3,3>(0,0);
@@ -100,7 +100,7 @@ Eigen::VectorXd twist(const Eigen::Vector3d &w, const Eigen::Vector3d &v)
     return V;
 }
 //// Un named Equation page 101, MR pre-print 2019
-///Equation 3.25 page 75, MR pre-print 2019
+///Equation 3.71 page 96, MR pre-print 2019
 Eigen::VectorXd twist(const Eigen::Vector3d &q, const Eigen::Vector3d &s, double h, double angular_velocity)
 {
         Eigen::VectorXd twist(6);
@@ -110,7 +110,7 @@ Eigen::VectorXd twist(const Eigen::Vector3d &q, const Eigen::Vector3d &s, double
         twist.tail<3>() = v * angular_velocity;
         return twist;
 }
-    ///Equation 3.25 page 75, MR pre-print 2019
+    ///Equation 3.71 page 101, MR pre-print 2019
 Eigen::Matrix4d twist_matrix(const Eigen::Vector3d &w, const Eigen::Vector3d &v)
 {
         Eigen::Matrix4d twist_hat = Eigen::Matrix4d::Zero();
@@ -119,7 +119,7 @@ Eigen::Matrix4d twist_matrix(const Eigen::Vector3d &w, const Eigen::Vector3d &v)
         twist_hat.block<3,1>(0,3) = v;
         return twist_hat;
 }
-    ///Equation 3.25 page 75, MR pre-print 2019
+    ///Equation 3.71 page 101, MR pre-print 2019
 Eigen::Matrix4d twist_matrix(const Eigen::VectorXd &twist)
 {
         Eigen::Matrix4d twist_hat = Eigen::Matrix4d::Zero();
@@ -133,7 +133,7 @@ Eigen::Matrix4d twist_matrix(const Eigen::VectorXd &twist)
         twist_hat.block<3,1>(0,3) = v;
         return twist_hat;
 }
-    // Table on page 145, MR pre-print 2019 Si=(wi,vi)
+    // Definition 3.24 page 102 MR pre-print 2019 Si=(w,v)
 Eigen::VectorXd screw_axis(const Eigen::Vector3d &w, const Eigen::Vector3d &v)
 {
     Eigen::VectorXd S(6);
@@ -160,7 +160,7 @@ Eigen::Matrix3d matrix_exponential(const Eigen::Vector3d &w, double theta)
          + (1.0 - std::cos(theta)) * (u_hat * u_hat);
     return R;
 }
-    // Preposition 3.25 on page 103, MR pre-print 2019
+    // Proposition 3.25 on page 103, MR pre-print 2019
 Eigen::Matrix4d matrix_exponential(const Eigen::Vector3d &w, const Eigen::Vector3d &v, double theta)
 {
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
@@ -174,7 +174,7 @@ Eigen::Matrix4d matrix_exponential(const Eigen::Vector3d &w, const Eigen::Vector
     T.block<3,1>(0,3) = G * v;
     return T;
 }
-    // Preposition 3.85-3.88 on page 102-103, MR pre-print 2019
+    // Proposition 3.25 on page 103-104, MR pre-print 2019
 Eigen::Matrix4d matrix_exponential(const Eigen::VectorXd &screw, double theta)
 {
         Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
@@ -185,9 +185,9 @@ Eigen::Matrix4d matrix_exponential(const Eigen::VectorXd &screw, double theta)
         Eigen::Matrix3d R = matrix_exponential(u, theta);
         Eigen::Matrix3d G = Eigen::Matrix3d::Identity()*theta +
                             (1.0 - std::cos(theta)) * u_hat
-                            + (theta - std::sin(theta)) * (u_hat * u_hat); // auto completed by clion
-        T.block<3,3>(0,0) = R; // auto completed by clion
-        T.block<3,1>(0,3) = G * v; // auto completed by clion
+                            + (theta - std::sin(theta)) * (u_hat * u_hat);
+        T.block<3,3>(0,0) = R;
+        T.block<3,1>(0,3) = G * v;
     return T;
 }
     // Equations 3.58 - 3.61, pages 85 - 86, MR pre-print 2019
@@ -217,34 +217,34 @@ std::pair<Eigen::Vector3d, double> matrix_logarithm(const Eigen::Matrix3d &r)
     }
     return std::pair<Eigen::Vector3d, double>(w, theta);
 }
-// redo
+    // Algorithm on page 104, MR pre-print 2019
 std::pair<Eigen::VectorXd, double> matrix_logarithm(const Eigen::Matrix3d &r, const Eigen::Vector3d &p)
     {
         Eigen::Vector3d w;
         Eigen::Vector3d v;
         double theta;
 
-        if ((r - Eigen::Matrix3d::Identity()).norm() < 1e-12) {
+        if (r.isApprox(Eigen::Matrix3d::Identity())) {
             w = Eigen::Vector3d::Zero();
-            v = p / p.norm();
             theta = p.norm();
-        } else {
-            theta = std::acos((r.trace() - 1.0) / 2.0);
-            Eigen::Matrix3d logR = theta / (2.0 * std::sin(theta)) * (r - r.transpose());
-            w = Eigen::Vector3d(logR(2,1), logR(0,2), logR(1,0));
+            v = p / theta;
 
-            const Eigen::Matrix3d skew_w = skew_symmetric(w);
-            double cot_half_theta = 1.0 / std::tan(theta / 2.0);
+        }else {
+            std::pair<Eigen::Vector3d, double> m_log = matrix_logarithm(r);
+            w = m_log.first;
+            theta = m_log.second;
+
+            Eigen::Matrix3d w_hat = skew_symmetric(w);
+            double cot_half_theta = cot(theta / 2.0);
 
             Eigen::Matrix3d G_inv = (1.0 / theta) * Eigen::Matrix3d::Identity()
-                                  - 0.5 * skew_w
-                                  + ((1.0 / theta) - 0.5 * cot_half_theta) * skew_w * skew_w;
-
+                                    - 0.5 * w_hat
+                                    + ((1.0 / theta) - 0.5 * cot_half_theta) * (w_hat * w_hat);
             v = G_inv * p;
         }
-
         Eigen::VectorXd S(6);
         S << w, v;
+
         return std::pair<Eigen::VectorXd, double>(S, theta);
 
 }
