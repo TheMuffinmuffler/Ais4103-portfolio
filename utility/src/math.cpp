@@ -161,6 +161,7 @@ Eigen::Matrix3d matrix_exponential(const Eigen::Vector3d &w, double theta)
     return R;
 }
     // Proposition 3.25 on page 103, MR pre-print 2019
+    // legg på if løkke side 104
 Eigen::Matrix4d matrix_exponential(const Eigen::Vector3d &w, const Eigen::Vector3d &v, double theta)
 {
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
@@ -177,17 +178,10 @@ Eigen::Matrix4d matrix_exponential(const Eigen::Vector3d &w, const Eigen::Vector
     // Proposition 3.25 on page 103-104, MR pre-print 2019
 Eigen::Matrix4d matrix_exponential(const Eigen::VectorXd &screw, double theta)
 {
-        Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
+
         Eigen::Vector3d w = screw.head<3>();
         Eigen::Vector3d v = screw.tail<3>();
-        Eigen::Vector3d u = w.normalized();
-        Eigen::Matrix3d u_hat = skew_symmetric(u);
-        Eigen::Matrix3d R = matrix_exponential(u, theta);
-        Eigen::Matrix3d G = Eigen::Matrix3d::Identity()*theta +
-                            (1.0 - std::cos(theta)) * u_hat
-                            + (theta - std::sin(theta)) * (u_hat * u_hat);
-        T.block<3,3>(0,0) = R;
-        T.block<3,1>(0,3) = G * v;
+        Eigen::Matrix4d T = matrix_exponential(w, v, theta);
     return T;
 }
     // Equations 3.58 - 3.61, pages 85 - 86, MR pre-print 2019
@@ -312,13 +306,13 @@ Eigen::Matrix3d rotate_z(double radians)
 Eigen::Matrix3d rotation_matrix_from_frame_axes(const Eigen::Vector3d &x, const Eigen::Vector3d &y, const Eigen::Vector3d &z)
     {
         Eigen::Matrix3d m;
-        m.col(0) = x;
-        m.col(1) = y;
-        m.col(2) = z;
+        m.col(0) = x.normalized();
+        m.col(1) = y.normalized();
+        m.col(2) = z.normalized();
         return m;
     }
 
-//using Equation R(⍺,β,𝛄) = I * Rot(ẑ,⍺) * Rot(ŷ,β) * Rot(x̂,𝛄) page 577 MR pre-print 2019
+//using Equation R(⍺,β,𝛄) = Rot(ẑ,⍺) * Rot(ŷ,β) * Rot(x̂,𝛄) page 577 MR pre-print 2019
 Eigen::Matrix3d rotation_matrix_from_euler_zyx(const Eigen::Vector3d &e)
 {
     double alpha = e(0);
@@ -339,27 +333,23 @@ Eigen::Matrix3d rotation_matrix_from_euler_zyx(const Eigen::Vector3d &e)
 //using equation (3.51) Rot(ˆ ω,θ) = e[ˆ ω] θ= I+ sin θ[ˆ ω] + (1−cos θ)[ˆ ω]2 ∈SO(3)
 Eigen::Matrix3d rotation_matrix_from_axis_angle(const Eigen::Vector3d &axis, double radians)
 {
-
-
-    // Normalize axis to ensure unit vector
     Eigen::Vector3d w = axis.normalized();
 
-    // Build skew-symmetric matrix
-    Eigen::Matrix3d w_hat = AIS4104::utility::skew_symmetric(w);
+    Eigen::Matrix3d w_hat = skew_symmetric(w);
 
-    // Rodrigues' formula
     Eigen::Matrix3d R = Eigen::Matrix3d::Identity()
                         + std::sin(radians) * w_hat
                         + (1 - std::cos(radians)) * (w_hat * w_hat);
-
     return R;
 }
 
+    //Equation (3.62) Page 87 MR pre-print 2019
 Eigen::Matrix3d rotation_matrix(const Eigen::Matrix4d &tf)
 {
         Eigen::Matrix3d R = tf.block<3,3>(0,0);
     return R;
 }
+
 //Equation (3.62) Page 87 MR pre-print 2019
 Eigen::Matrix4d transformation_matrix(const Eigen::Vector3d &p)
 {
@@ -367,6 +357,7 @@ Eigen::Matrix4d transformation_matrix(const Eigen::Vector3d &p)
     T.block<3,1>(0,3) = p;
     return T;
 }
+
 // Equation (3.62) Page 87 MR pre-print 2019
 Eigen::Matrix4d transformation_matrix(const Eigen::Matrix3d &r)
 {Eigen::Matrix4d T = Eigen::Matrix4d::Identity();

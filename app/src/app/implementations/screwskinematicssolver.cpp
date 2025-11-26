@@ -112,7 +112,7 @@ std::pair<Eigen::Matrix4d, std::vector<Eigen::VectorXd>> ScrewsKinematicsSolver:
 
 //TASK: Implement body_chain(). You can obtain the variables to transform to body frame from space_chain().
 
-// Derived from Formula 4.14 page 140, unnamed equation Bi = [AdM−1 ]Si page 147, MR pre-print 2019
+// Derived from Formula 4.14/4.16 page 140 and 147, unnamed equation Bi = [AdM−1 ]Si page 147, MR pre-print 2019
 std::pair<Eigen::Matrix4d, std::vector<Eigen::VectorXd>> ScrewsKinematicsSolver::body_chain()
 {
     auto [M, screw_space] = space_chain();
@@ -131,7 +131,7 @@ std::pair<Eigen::Matrix4d, std::vector<Eigen::VectorXd>> ScrewsKinematicsSolver:
 }
 
 //TASK: Implement space_jacobian() using space_chain()
-//Formula 5.11 space jacobian 5.2.1 page 178, MR pre-print 2019
+//Equation 5.11 space jacobian 5.2.1 page 178, MR pre-print 2019
 Eigen::MatrixXd ScrewsKinematicsSolver::space_jacobian(const Eigen::VectorXd &current_joint_positions)
 {
     auto [M, space_screws] = space_chain();
@@ -157,7 +157,7 @@ Eigen::MatrixXd ScrewsKinematicsSolver::space_jacobian(const Eigen::VectorXd &cu
 }
 
 //TASK: Implement body_jacobian() using body_chain()
-//Formula 5.17 and 5.18 body jacobian 5.1.2 page 182, MR pre-print 2019
+//Formula 5.17 and 5.18 body jacobian 5.1.2 page 182-183, MR pre-print 2019
 Eigen::MatrixXd ScrewsKinematicsSolver::body_jacobian(const Eigen::VectorXd &current_joint_positions)
 {
     auto [M, body_screws] = body_chain();
