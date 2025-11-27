@@ -161,9 +161,10 @@ Eigen::Matrix3d matrix_exponential(const Eigen::Vector3d &w, double theta)
     return R;
 }
     // Proposition 3.25 on page 103, MR pre-print 2019
-    // legg på if løkke side 104
+
 Eigen::Matrix4d matrix_exponential(const Eigen::Vector3d &w, const Eigen::Vector3d &v, double theta)
 {
+        /*
     Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
     Eigen::Vector3d u = w.normalized();
     Eigen::Matrix3d u_hat = skew_symmetric(u);
@@ -171,8 +172,22 @@ Eigen::Matrix4d matrix_exponential(const Eigen::Vector3d &w, const Eigen::Vector
     Eigen::Matrix3d G = Eigen::Matrix3d::Identity()*theta
                       + (1.0 - std::cos(theta)) * u_hat
                       + (theta - std::sin(theta)) * (u_hat * u_hat);
-    T.block<3,3>(0,0) = R;
-    T.block<3,1>(0,3) = G * v;
+                      */
+        Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
+        if (w.norm()< 1e-6) {
+            T.block<3,3>(0,0) = Eigen::Matrix3d::Identity();
+            T.block<3,1>(0,3) = v * theta;
+        }
+        else{
+            Eigen::Vector3d u = w.normalized();
+            Eigen::Matrix3d u_hat = skew_symmetric(u);
+            Eigen::Matrix3d R =matrix_exponential(w,theta);
+            Eigen::Matrix3d G = Eigen::Matrix3d::Identity() * theta
+            + (1.0-std::cos(theta)) * u_hat + (theta-std::sin(theta))*(u_hat * u_hat);
+            T.block<3,3>(0,0) = R;
+            T.block<3,1>(0,3) = G * v;
+        }
+
     return T;
 }
     // Proposition 3.25 on page 103-104, MR pre-print 2019

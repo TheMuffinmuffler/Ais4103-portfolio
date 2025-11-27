@@ -36,6 +36,7 @@ Eigen::VectorXd MotionPlannerImpl::task_space_screw(const Eigen::Matrix4d &tw_st
 Eigen::VectorXd MotionPlannerImpl::tool_frame_displace(const Eigen::Matrix4d &tw_start_pose, const Eigen::Vector3d &tf_offset, const Eigen::Vector3d &tf_zyx)
 {
     Eigen::Matrix4d pose = tw_start_pose * utility::transformation_matrix(utility::rotation_matrix_from_euler_zyx(tf_zyx), tf_offset);
+    Eigen::Matrix4d start_angles = ik_solver_pose->joint_positions();
     return m_robot.joint_positions();
 }
 
