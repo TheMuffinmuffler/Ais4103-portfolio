@@ -86,7 +86,8 @@ void RobotWrapper::set_tool_transform(Eigen::Matrix4d transform)
 // Relevant variables are m_solver and m_tool_transform.
 Eigen::Matrix4d RobotWrapper::current_pose() const
 {
-    return current_flange_pose() * m_tool_transform.inverse();
+    Eigen::Matrix4d T = current_flange_pose();
+    return T * m_tool_transform;
 }
 
 //TASK: Calculate the position of the end effector using forward kinematics.
@@ -114,6 +115,7 @@ Eigen::Matrix4d RobotWrapper::current_flange_pose() const
 
 //TASK: Based on the flange pose, return its linear position.
 Eigen::Vector3d RobotWrapper::current_flange_position() const {
+
     Eigen::Matrix4d T = current_flange_pose();
     Eigen::Vector3d p = T.block<3,1>(0,3);
 
@@ -123,10 +125,10 @@ Eigen::Vector3d RobotWrapper::current_flange_position() const {
 //TASK: Based on the flange pose, return its orientation in the Euler ZYX representation.
 Eigen::Vector3d RobotWrapper::current_flange_orientation_zyx() const
 {
-    Eigen::Matrix4d T = current_pose();
+    Eigen::Matrix4d T = current_flange_pose();
     Eigen::Matrix3d R = utility::rotation_matrix(T);
-    Eigen::Vector3d euler_ZYX = utility::euler_zyx_from_rotation_matrix(R);
-    return euler_ZYX;
+
+    return utility::euler_zyx_from_rotation_matrix(R);
 }
 
 const Simulation::JointLimits& RobotWrapper::joint_limits() const
