@@ -53,6 +53,7 @@ inline Visualization::ToolConfigurationWindow::State default_tool_state()
         //Eigen::Vector3f{0.f, 0.f, 0.f},
         //Euler ZYX orientation (IN DEGREES) of the tool center point used for robot kinematics.
         Eigen::Vector3f{0.f, 15.f, 90.f}
+        //Eigen::Vector3f{0.f, 0.f, 0.f}
     };
 }
 
