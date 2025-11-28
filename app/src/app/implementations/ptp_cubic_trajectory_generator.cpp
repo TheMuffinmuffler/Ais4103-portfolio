@@ -41,15 +41,20 @@ bool PTPCubicTrajectoryGenerator::plan_trajectory(const Simulation::JointLimits 
     }
     return true;
 }
-
+// re use what was acctualy there
+// chapter 9.2.2.1 page 331-332 equation 9.9-9.13 plus the unnamed beneath
 Eigen::VectorXd PTPCubicTrajectoryGenerator::joint_positions(std::chrono::nanoseconds delta_t)
 {
     if(m_stopped)
     {
-        double s = std::clamp(static_cast<double>(m_current.count()) / static_cast<double>(m_total.count()), 0.0, 1.0);
+//changed s for t because t = time t = current time/total time, where t /in [0,1]
+        double t = std::clamp(static_cast<double>(m_current.count()) / static_cast<double>(m_total.count()), 0.0, 1.0);
+        //a_1 = 0
+        double s = t*t*t*3.0 - t*t*2.0;
         return m_w0 + s * (m_w1 - m_w0);
     }
     m_current = std::clamp(m_current + delta_t, std::chrono::nanoseconds(0), m_total);
-    double s = std::clamp(static_cast<double>(m_current.count()) / static_cast<double>(m_total.count()), 0.0, 1.0);
+    double t = std::clamp(static_cast<double>(m_current.count()) / static_cast<double>(m_total.count()), 0.0, 1.0);
+    double s = t*t*t*2.0 - t*t*2.0;
     return m_w0 + s * (m_w1 - m_w0);
 }

@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "app/examples/ptplinetrajectorygeneratorexample.h"
+#include "app/implementations/ptp_cubic_trajectory_generator.h"
 
 #include <utility/vectors.h>
 
@@ -45,8 +46,12 @@ Eigen::VectorXd MotionPlannerImpl::tool_frame_displace(const Eigen::Matrix4d &tw
 //TASK: Implement a P2P trajectory generator from the current configuration to the target.
 std::shared_ptr<Simulation::TrajectoryGenerator> MotionPlannerImpl::task_space_ptp_trajectory(const Eigen::Vector3d &pos, const Eigen::Vector3d &euler_zyx)
 {
+    Eigen::Matrix4d T = utility::transformation_matrix(utility::rotation_matrix_from_euler_zyx(euler_zyx),pos);
+    Eigen::VectorXd start_p = m_robot.joint_positions();
+    Eigen::VectorXd end_p = m_robot.ik_solve_pose(T,start_p);
+    auto p2p_trajectory = std::make_shared<PTPCubicTrajectoryGenerator>(start_p,end_p);
     std::cout << "MotionPlannerImpl::task_space_ptp_trajectory:" << std::endl << pos.transpose() << std::endl << euler_zyx.transpose() << std::endl << std::endl;
-    return nullptr;
+    return p2p_trajectory;
 }
 
 //TASK: Implement a LIN trajectory generator from the current configuration to the target.
