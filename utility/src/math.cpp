@@ -5,7 +5,7 @@
 
 namespace AIS4104::utility {
 
-    // from Assignment 2
+    // from Assignment 2 (tan=sin/cos)
     double cot(double x)
     {
         return 1 /(std::sin(x) / std::cos(x));
@@ -217,7 +217,7 @@ std::pair<Eigen::Vector3d, double> matrix_logarithm(const Eigen::Matrix3d &r)
         }
         else {
             theta = acos(0.5*(trace_r-1));
-            double w_n = 1/2*std::sin(theta);
+            double w_n = 1/(2*std::sin(theta));
             double w_1 = w_n * (r(2,1)-r(1,2));
             double w_2 = w_n * (r(0,2)-r(2,0));
             double w_3 = w_n * (r(1,0)-r(0,1));
@@ -349,9 +349,7 @@ Eigen::Matrix3d rotation_matrix_from_euler_zyx(const Eigen::Vector3d &e)
 Eigen::Matrix3d rotation_matrix_from_axis_angle(const Eigen::Vector3d &axis, double radians)
 {
     Eigen::Vector3d w = axis.normalized();
-
     Eigen::Matrix3d w_hat = skew_symmetric(w);
-
     Eigen::Matrix3d R = Eigen::Matrix3d::Identity()
                         + std::sin(radians) * w_hat
                         + (1 - std::cos(radians)) * (w_hat * w_hat);

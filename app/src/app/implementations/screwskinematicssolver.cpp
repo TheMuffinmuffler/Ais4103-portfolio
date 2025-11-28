@@ -55,8 +55,6 @@ Eigen::VectorXd ScrewsKinematicsSolver::ik_solve(const Eigen::Matrix4d &t_sd, co
 
     const double w_tol = m_we;
     const double v_tol = m_ve;
-
-
     const double lambda = 1e-3;
 
     const int MAX_ITER = 1000;
@@ -74,7 +72,6 @@ Eigen::VectorXd ScrewsKinematicsSolver::ik_solve(const Eigen::Matrix4d &t_sd, co
 
         const auto [S_e, theta_e] = utility::matrix_logarithm(T_bd);
         const Eigen::VectorXd V_e = S_e * theta_e;
-
         const double w_err = V_e.head<3>().norm();
         const double v_err = V_e.tail<3>().norm();
 
@@ -162,9 +159,9 @@ Eigen::MatrixXd ScrewsKinematicsSolver::body_jacobian(const Eigen::VectorXd &cur
 {
     auto [M, body_screws] = body_chain();
 
-
     const int n_c = current_joint_positions.size();
     const int n_s = body_screws.size();
+
     if (n_s != n_c) {
 
         return Eigen::MatrixXd::Zero(6,n_s);

@@ -43,6 +43,7 @@ bool PTPCubicTrajectoryGenerator::plan_trajectory(const Simulation::JointLimits 
 }
 // re use what was acctualy there
 // chapter 9.2.2.1 page 331-332 equation 9.9-9.13 plus the unnamed beneath
+// might have implimenteted this wrong and missunderstod s and t.
 Eigen::VectorXd PTPCubicTrajectoryGenerator::joint_positions(std::chrono::nanoseconds delta_t)
 {
     if(m_stopped)
