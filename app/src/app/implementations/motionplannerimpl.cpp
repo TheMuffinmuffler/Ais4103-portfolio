@@ -30,10 +30,10 @@ Eigen::VectorXd MotionPlannerImpl::task_space_pose(const Eigen::Matrix4d &pose)
 Eigen::VectorXd MotionPlannerImpl::task_space_screw(const Eigen::Matrix4d &tw_start_pose, const Eigen::Vector3d &w, const Eigen::Vector3d &q, double theta, double h)
 {
     Eigen::VectorXd Screw = utility::screw_axis(q,w,h);
-    Eigen::Matrix4d T = utility::matrix_exponential(Screw,theta);
-    Eigen::Matrix4d target_pose = T * tw_start_pose;
+    Eigen::Matrix4d T = utility::matrix_exponential(Screw,theta); // page 105-106 MR-2019 TscTsb-1=e[S]theta
+    Eigen::Matrix4d target_TCP_pose = T * tw_start_pose;
     std::cout << "MotionPlannerImpl::task_space_screw:" << std::endl << w.transpose() << std::endl << q.transpose() << std::endl << theta << std::endl << h << std::endl << std::endl;
-    return m_robot.ik_solve_pose(target_pose,m_robot.joint_positions());
+    return m_robot.ik_solve_pose(target_TCP_pose,m_robot.joint_positions());
 }
 
 //TASK: Implement jogging in tool frame from the start pose along the displacement and rotation
@@ -47,9 +47,9 @@ Eigen::VectorXd MotionPlannerImpl::tool_frame_displace(const Eigen::Matrix4d &tw
 std::shared_ptr<Simulation::TrajectoryGenerator> MotionPlannerImpl::task_space_ptp_trajectory(const Eigen::Vector3d &pos, const Eigen::Vector3d &euler_zyx)
 {
     Eigen::Matrix4d T = utility::transformation_matrix(utility::rotation_matrix_from_euler_zyx(euler_zyx),pos);
-    Eigen::VectorXd start_p = m_robot.joint_positions();
-    Eigen::VectorXd end_p = m_robot.ik_solve_pose(T,start_p);
-    auto p2p_trajectory = std::make_shared<PTPCubicTrajectoryGenerator>(start_p,end_p);
+    Eigen::VectorXd current_p = m_robot.joint_positions();
+    Eigen::VectorXd end_p = m_robot.ik_solve_pose(T,current_p);
+    auto p2p_trajectory = std::make_shared<PTPCubicTrajectoryGenerator>(current_p,end_p);
     std::cout << "MotionPlannerImpl::task_space_ptp_trajectory:" << std::endl << pos.transpose() << std::endl << euler_zyx.transpose() << std::endl << std::endl;
     return p2p_trajectory;
 }
